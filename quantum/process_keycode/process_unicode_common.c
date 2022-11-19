@@ -16,6 +16,7 @@
 
 #include "process_unicode_common.h"
 #include "eeprom.h"
+#include "guess_os.h"
 #include "utf8.h"
 
 unicode_config_t unicode_config;
@@ -28,6 +29,29 @@ static uint8_t selected[]     = {UNICODE_SELECTED_MODES};
 static int8_t  selected_count = sizeof selected / sizeof *selected;
 static int8_t  selected_index;
 #endif
+
+
+void guess_auto_unicode_input_mode(void) {
+    if (unicode_config.input_mode != UC_AUTO) {
+        return;
+    }
+    OSVariant os = guess_host_os();
+    dprintf("Guessing unicode input mode from host os: %u\n", os);
+    switch (os) {
+        case OS_LINUX:
+            unicode_config.input_mode = UC_LNX;
+            break;
+        case OS_WINDOWS:
+            unicode_config.input_mode = UC_WINC;
+            break;
+        case OS_IOS:
+        case OS_MACOS:
+            unicode_config.input_mode = UC_MAC;
+            break;
+        default:
+            break;
+    }
+}
 
 void unicode_input_mode_init(void) {
     unicode_config.raw = eeprom_read_byte(EECONFIG_UNICODEMODE);
@@ -50,6 +74,7 @@ void unicode_input_mode_init(void) {
     unicode_config.input_mode = selected[selected_index = 0];
 #    endif
 #endif
+    guess_auto_unicode_input_mode();
     dprintf("Unicode input mode init to: %u\n", unicode_config.input_mode);
 }
 
@@ -60,6 +85,7 @@ uint8_t get_unicode_input_mode(void) {
 void set_unicode_input_mode(uint8_t mode) {
     unicode_config.input_mode = mode;
     persist_unicode_input_mode();
+    guess_auto_unicode_input_mode();
     dprintf("Unicode input mode set to: %u\n", unicode_config.input_mode);
 }
 
@@ -73,6 +99,7 @@ void cycle_unicode_input_mode(int8_t offset) {
 #    if UNICODE_CYCLE_PERSIST
     persist_unicode_input_mode();
 #    endif
+    guess_auto_unicode_input_mode();
     dprintf("Unicode input mode cycle to: %u\n", unicode_config.input_mode);
 #endif
 }
