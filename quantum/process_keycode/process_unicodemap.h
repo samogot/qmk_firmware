@@ -22,3 +22,4 @@ extern const uint32_t PROGMEM unicode_map[];
 
 uint16_t unicodemap_index(uint16_t keycode);
 bool     process_unicodemap(uint16_t keycode, keyrecord_t *record);
+void     tap_unicodemap_code(uint16_t keycode);

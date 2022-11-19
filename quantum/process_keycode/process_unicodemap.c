@@ -39,10 +39,16 @@ __attribute__((weak)) uint16_t unicodemap_index(uint16_t keycode) {
     }
 }
 
-bool process_unicodemap(uint16_t keycode, keyrecord_t *record) {
-    if (keycode >= QK_UNICODEMAP && keycode <= QK_UNICODEMAP_PAIR_MAX && record->event.pressed) {
+void tap_unicodemap_code(uint16_t keycode) {
+    if (keycode >= QK_UNICODEMAP && keycode <= QK_UNICODEMAP_PAIR_MAX) {
         uint32_t code_point = pgm_read_dword(unicode_map + unicodemap_index(keycode));
         register_unicode(code_point);
+    }
+}
+
+bool process_unicodemap(uint16_t keycode, keyrecord_t *record) {
+    if (record->event.pressed) {
+        tap_unicodemap_code(keycode);
     }
     return true;
 }
