@@ -18,10 +18,8 @@
 #include "keymap_danish.h"
 #include "keymap_norwegian.h"
 #include "keymap_portuguese.h"
-#include "keymap_contributions.h"
 #include "keymap_czech.h"
 #include "keymap_romanian.h"
-#include "keymap_russian.h"
 #include "keymap_uk.h"
 #include "keymap_estonian.h"
 #include "keymap_belgian.h"
@@ -29,6 +27,8 @@
 #include "keymap_croatian.h"
 #include "keymap_turkish_q.h"
 #include "keymap_slovak.h"
+#include "unicodemap_keymap_russian.h"
+#include "unicodemap_keymap_ukrainian.h"
 
 #define KC_MAC_UNDO LGUI(KC_Z)
 #define KC_MAC_CUT LGUI(KC_X)
