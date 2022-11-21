@@ -76,7 +76,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     TG(1),          KC_A,           KC_S,           KC_D,           KC_F,           MT(MOD_LGUI, KC_G),KC_DELETE,                                                                      KC_BSPACE,      MT(MOD_RGUI, KC_H),KC_J,           KC_K,           KC_L,           KC_SCOLON,      KC_QUOTE,       
     KC_LSHIFT,      KC_Z,           KC_X,           KC_C,           KC_V,           KC_B,                                           KC_N,           KC_M,           KC_COMMA,       KC_DOT,         KC_SLASH,       KC_RSHIFT,      
     KC_LCTRL,       KC_LALT,        KC_LGUI,        KC_LALT,        KC_NO,          KC_ESCAPE,                                                                                                      KC_DELETE,      OSL(2),         KC_RCTRL,       KC_RGUI,        KC_RALT,        KC_RCTRL,       
-    ALL_T(KC_SPACE),KC_BSPACE,      KC_TRANSPARENT,                 KC_TRANSPARENT, KC_RGUI,        KC_RSHIFT
+    ALL_T(KC_SPACE),KC_BSPACE,      UC_MOD,                 KC_TRANSPARENT, KC_RGUI,        KC_RSHIFT
   ),
   [1] = LAYOUT_moonlander(
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,                                 KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, 
@@ -174,14 +174,47 @@ void rgb_matrix_indicators_user(void) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  switch (keycode) {
-    case RGB_SLD:
-      if (record->event.pressed) {
-        rgblight_mode(1);
-      }
-      return false;
-  }
-  return true;
+    switch (keycode) {
+        case RGB_SLD:
+            if (record->event.pressed) {
+                rgblight_mode(1);
+            }
+            return false;
+        case UA_28:
+            if (get_unicode_input_mode() == UC_MAC) {
+                if (record->event.pressed) {
+                    tap_code(KC_A);
+                }
+                return false;
+            }
+            break;
+        case UA_26:
+            if (get_unicode_input_mode() == UC_MAC) {
+                if (record->event.pressed) {
+                    tap_code(KC_P);
+                }
+                return false;
+            }
+            break;
+    }
+    return true;
+}
+
+uint16_t keymap_key_to_keycode(uint8_t layer, keypos_t key) {
+    if (layer == 2) {
+        uint8_t mods = get_mods() | get_weak_mods();
+
+#ifndef NO_ACTION_ONESHOT
+        mods |= get_oneshot_mods();
+#endif
+        if (mods & ~MOD_MASK_SHIFT) {
+            return KC_TRANSPARENT;
+        }
+    }
+    if (key.row < MATRIX_ROWS && key.col < MATRIX_COLS) {
+        return pgm_read_word(&keymaps[layer][key.row][key.col]);
+    }
+    return KC_NO;
 }
 
 typedef struct {

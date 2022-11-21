@@ -126,7 +126,7 @@ __attribute__((weak)) void unicode_input_start(void) {
 
     switch (unicode_config.input_mode) {
         case UC_MAC:
-            register_code(UNICODE_KEY_MAC);
+            register_code16(UNICODE_KEY_MAC);
             break;
         case UC_LNX:
             tap_code16(UNICODE_KEY_LNX);
@@ -152,7 +152,7 @@ __attribute__((weak)) void unicode_input_start(void) {
 __attribute__((weak)) void unicode_input_finish(void) {
     switch (unicode_config.input_mode) {
         case UC_MAC:
-            unregister_code(UNICODE_KEY_MAC);
+            unregister_code16(UNICODE_KEY_MAC);
             break;
         case UC_LNX:
             tap_code(KC_SPACE);
@@ -177,7 +177,7 @@ __attribute__((weak)) void unicode_input_finish(void) {
 __attribute__((weak)) void unicode_input_cancel(void) {
     switch (unicode_config.input_mode) {
         case UC_MAC:
-            unregister_code(UNICODE_KEY_MAC);
+            unregister_code16(UNICODE_KEY_MAC);
             break;
         case UC_LNX:
             tap_code(KC_ESCAPE);
