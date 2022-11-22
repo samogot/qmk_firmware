@@ -13,7 +13,7 @@ if [[ $(git log -n 1 --pretty='format:%s') == $VER ]]; then
   exit 0
 fi
 
-curl -O $URL || (git checkout master; exit 1)
+curl -Lo $BASENAME.zip $URL || (git checkout master; exit 1)
 unzip -o -j $BASENAME "${KB}_${KM}_source/*" -d keyboards/$KB/keymaps/$KM
 rm $BASENAME.zip
 
