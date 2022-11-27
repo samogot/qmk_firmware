@@ -50,6 +50,7 @@
 
 enum custom_keycodes {
   RGB_SLD = ML_SAFE_RANGE,
+  CMD_OR_CTRL,
 };
 
 
@@ -80,7 +81,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TAB,         KC_Q,           KC_W,           KC_E,           KC_R,           KC_T,           KC_TRANSPARENT,                                 KC_TRANSPARENT, KC_Y,           KC_U,           KC_I,           KC_O,           KC_P,           KC_BSLASH,
     TG(1),          KC_A,           KC_S,           KC_D,           KC_F,           MT(MOD_LGUI, KC_G),KC_DELETE,                                                                      KC_BSPACE,      MT(MOD_RGUI, KC_H),KC_J,           KC_K,           KC_L,           KC_SCOLON,      KC_QUOTE,
     KC_LSHIFT,      KC_Z,           KC_X,           KC_C,           KC_V,           KC_B,                                           KC_N,           KC_M,           KC_COMMA,       KC_DOT,         KC_SLASH,       KC_RSHIFT,      
-    KC_LCTRL,       KC_LALT,        KC_LGUI,        KC_LALT,        KC_LGUI,        KC_ESCAPE,                                                                                                      KC_ENTER,       TG(2),          KC_RCTRL,       KC_RGUI,        KC_RALT,        KC_RCTRL,
+    KC_LCTRL,       KC_LALT,        KC_LGUI,        KC_LALT,        CMD_OR_CTRL,        KC_ESCAPE,                                                                                                      KC_ENTER,       TG(2),          KC_RCTRL,       KC_RGUI,        KC_RALT,        KC_RCTRL,
     ALL_T(KC_SPACE),KC_APPLICATION, UC_MOD,                 CAPS_WORD,      KC_RGUI,        KC_RSHIFT
   ),
   [1] = LAYOUT_moonlander(
@@ -121,7 +122,7 @@ extern rgb_config_t rgb_matrix_config;
 
 void keyboard_post_init_user(void) {
   rgb_matrix_enable();
-//  debug_enable=true;
+  debug_enable=true;
 //  debug_matrix=true;
 //  debug_keyboard=true;
 //  debug_mouse=true;
@@ -223,7 +224,15 @@ void tap_unicodemap_code_or_latin(uint16_t keycode, uint8_t latin_replacement) {
     if (get_unicode_input_mode() != UC_MAC) {
         tap_unicodemap_code(keycode);
     } else {
-        tap_code(latin_replacement);
+        tap_code16(latin_replacement);
+    }
+}
+
+uint8_t cmd_or_ctrl(void) {
+    if (get_unicode_input_mode() == UC_MAC) {
+        return KC_LCMD;
+    } else {
+        return KC_LCTRL;
     }
 }
 
@@ -241,6 +250,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         case UC_MOD:
             ML_LED_5((get_unicode_input_mode() == UC_WINC));
+            return true;
+        case CMD_OR_CTRL:
+            if (record->event.pressed) {
+                register_code(cmd_or_ctrl());
+            } else {
+                unregister_code(cmd_or_ctrl());
+            }
+            return false;
     }
     return true;
 }
@@ -260,6 +277,29 @@ uint16_t keymap_key_to_keycode(uint8_t layer, keypos_t key) {
         return pgm_read_word(&keymaps[layer][key.row][key.col]);
     }
     return KC_NO;
+}
+
+bool caps_word_press_user(uint16_t keycode) {
+    switch (keycode) {
+        // Keycodes that continue Caps Word, with shift applied.
+        case KC_A ... KC_Z:
+        case KC_MINS:
+        case QK_UNICODEMAP ... QK_UNICODEMAP_PAIR_MAX:
+        case TD(DANCE_0) ... TD(DANCE_10):
+            add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
+            send_keyboard_report();
+            return true;
+
+        // Keycodes that continue Caps Word, without shifting.
+        case KC_1 ... KC_0:
+        case KC_BSPC:
+        case KC_DEL:
+        case KC_UNDS:
+            return true;
+
+        default:
+            return false; // Deactivate Caps Word.
+    }
 }
 
 typedef struct {
@@ -557,7 +597,7 @@ void dance_7_finished(qk_tap_dance_state_t *state, void *user_data) {
     dance_state[7].step = dance_step(state);
     switch (dance_state[7].step) {
         case SINGLE_TAP: tap_unicodemap_code(UA_13); break;
-        case SINGLE_HOLD: register_code16(KC_DOT); break;
+        case SINGLE_HOLD: caps_word_off(); register_code16(KC_DOT); break;
         case DOUBLE_TAP: tap_unicodemap_code(UA_13); tap_unicodemap_code(UA_13); break;
         case DOUBLE_SINGLE_TAP: tap_unicodemap_code(UA_13); tap_unicodemap_code(UA_13);
     }
@@ -592,7 +632,7 @@ void dance_8_finished(qk_tap_dance_state_t *state, void *user_data) {
     dance_state[8].step = dance_step(state);
     switch (dance_state[8].step) {
         case SINGLE_TAP: tap_unicodemap_code(UA_12); break;
-        case SINGLE_HOLD: register_code16(KC_COMMA); break;
+        case SINGLE_HOLD: caps_word_off(); register_code16(KC_COMMA); break;
         case DOUBLE_TAP: tap_unicodemap_code(UA_12); tap_unicodemap_code(UA_12); break;
         case DOUBLE_SINGLE_TAP: tap_unicodemap_code(UA_12); tap_unicodemap_code(UA_12);
     }
@@ -627,7 +667,7 @@ void dance_9_finished(qk_tap_dance_state_t *state, void *user_data) {
     dance_state[9].step = dance_step(state);
     switch (dance_state[9].step) {
         case SINGLE_TAP: tap_unicodemap_code(UA_32); break;
-        case SINGLE_HOLD: register_code16(KC_SLASH); break;
+        case SINGLE_HOLD: caps_word_off(); register_code16(KC_SLASH); break;
         case DOUBLE_TAP: tap_unicodemap_code(UA_32); tap_unicodemap_code(UA_32); break;
         case DOUBLE_SINGLE_TAP: tap_unicodemap_code(UA_32); tap_unicodemap_code(UA_32);
     }
@@ -650,7 +690,7 @@ void dance_10_finished(qk_tap_dance_state_t *state, void *user_data) {
     dance_state[10].step = dance_step(state);
     switch (dance_state[10].step) {
         case SINGLE_TAP: layer_and(2); break;
-        case SINGLE_HOLD: register_code16(KC_LGUI); break;
+        case SINGLE_HOLD: caps_word_off(); register_code16(cmd_or_ctrl()); break;
         case DOUBLE_TAP: layer_and(2); break;
         case DOUBLE_SINGLE_TAP: layer_and(2); break;
     }
@@ -659,7 +699,7 @@ void dance_10_finished(qk_tap_dance_state_t *state, void *user_data) {
 void dance_10_reset(qk_tap_dance_state_t *state, void *user_data) {
     wait_ms(10);
     switch (dance_state[10].step) {
-        case SINGLE_HOLD: unregister_code16(KC_LGUI); break;
+        case SINGLE_HOLD: unregister_code16(cmd_or_ctrl()); break;
     }
     dance_state[10].step = 0;
 }

@@ -49,6 +49,7 @@ void guess_auto_unicode_input_mode(void) {
             unicode_config.input_mode = UC_MAC;
             break;
         default:
+            unicode_config.input_mode = UC_MAC;
             break;
     }
 }
