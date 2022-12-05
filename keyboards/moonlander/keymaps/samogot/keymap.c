@@ -71,7 +71,7 @@ enum tap_dance_codes {
   DANCE_13,
   DANCE_14,
   DANCE_15,
-    DANCE_TG,
+  DANCE_TG,
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -604,17 +604,25 @@ void dance_7_reset(qk_tap_dance_state_t *state, void *user_data) {
 void dance_8_finished(qk_tap_dance_state_t *state, void *user_data);
 void dance_8_reset(qk_tap_dance_state_t *state, void *user_data);
 
+void on_dance_8(qk_tap_dance_state_t *state, void *user_data) {
+    dance_state[8].step = get_oneshot_layer() << 3 | get_oneshot_layer_state();
+    reset_oneshot_layer();
+}
+
 void dance_8_finished(qk_tap_dance_state_t *state, void *user_data) {
-    dance_state[8].step = dance_step(state);
-    if (dance_state[8].step == SINGLE_TAP && state->pressed) {
+    uint8_t osl = dance_state[8].step >> 3;
+    uint8_t osl_state = dance_state[8].step & 0b111;
+    dance_state[8].step = 0;
+    if (state->count == 1 && state->pressed) {
         dance_state[8].step = SINGLE_HOLD;
     }
     if (dance_state[8].step == SINGLE_HOLD) {
+        if (osl_state) {
+            set_oneshot_layer(osl, osl_state);
+        }
         caps_word_off();
         register_code16(cmd_or_ctrl());
-    } else if (get_oneshot_layer_state()) {
-        reset_oneshot_layer();
-    } else {
+    } else if (!osl_state) {
         layer_and(2);
     }
 }
@@ -887,7 +895,7 @@ qk_tap_dance_action_t tap_dance_actions[] = {
         [DANCE_5] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_5, dance_5_finished, dance_5_reset),
         [DANCE_6] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_6, dance_6_finished, dance_6_reset),
         [DANCE_7] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_7, dance_7_finished, dance_7_reset),
-        [DANCE_8] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_8_finished, dance_8_reset),
+        [DANCE_8] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_8, dance_8_finished, dance_8_reset),
         [DANCE_9] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_9_finished, dance_9_reset),
         [DANCE_10] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_10, dance_10_finished, dance_10_reset),
         [DANCE_11] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_11_finished, dance_11_reset),
