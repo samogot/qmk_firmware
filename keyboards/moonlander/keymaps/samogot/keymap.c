@@ -321,12 +321,15 @@ bool caps_word_press_user(uint16_t keycode) {
 
 enum combo_events {
   JK_ESC,
+  THUMBS_TT_NAV,
   COMBO_LENGTH
 };
 uint16_t COMBO_LEN = COMBO_LENGTH;
 const uint16_t PROGMEM jk_combo[] = {KC_J, KC_K, COMBO_END};
+const uint16_t PROGMEM tt_nav_combo[] = {CMD_OR_CTRL, OSL(2), COMBO_END};
 combo_t key_combos[] = {
   [JK_ESC] = COMBO(jk_combo, KC_ESC),
+  [THUMBS_TT_NAV] = COMBO(tt_nav_combo, TT(4)),
 };
 
 typedef struct {
