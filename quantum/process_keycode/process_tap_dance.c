@@ -97,6 +97,11 @@ static inline void process_tap_dance_action_on_dance_finished(qk_tap_dance_actio
     add_weak_mods(action->state.weak_mods);
     send_keyboard_report();
     _process_tap_dance_action_fn(&action->state, action->user_data, action->fn.on_dance_finished);
+#ifndef NO_ACTION_ONESHOT
+    if (action->state.oneshot_layer == get_oneshot_layer()) {
+        clear_oneshot_layer_state(ONESHOT_OTHER_KEY_PRESSED);
+    }
+#endif
 }
 
 static inline void process_tap_dance_action_on_reset(qk_tap_dance_action_t *action) {
@@ -145,8 +150,10 @@ bool process_tap_dance(uint16_t keycode, keyrecord_t *record) {
                 action->state.timer = timer_read();
 #ifndef NO_ACTION_ONESHOT
                 action->state.oneshot_mods = get_oneshot_mods();
+                action->state.oneshot_layer = get_oneshot_layer();
 #else
                 action->state.oneshot_mods = 0;
+                action->state.oneshot_layer = 0;
 #endif
                 action->state.weak_mods = get_mods();
                 action->state.weak_mods |= get_weak_mods();

@@ -98,6 +98,7 @@ enum action_kind_id {
     ACT_LAYER_MODS    = 0b1001,
     ACT_LAYER_TAP     = 0b1010, /* Layer  0-15 */
     ACT_LAYER_TAP_EXT = 0b1011, /* Layer 16-31 */
+    ACT_NO_EXT  = 0b1100,
 };
 
 /** \brief Action Code Struct
@@ -196,6 +197,8 @@ enum usage_pages { PAGE_SYSTEM, PAGE_CONSUMER };
 #define ACTION_USAGE_SYSTEM(id) ACTION(ACT_USAGE, PAGE_SYSTEM << 10 | (id))
 #define ACTION_USAGE_CONSUMER(id) ACTION(ACT_USAGE, PAGE_CONSUMER << 10 | (id))
 #define ACTION_MOUSEKEY(key) ACTION(ACT_MOUSEKEY, key)
+
+enum no_ext_codes { NO_EXT_TAP_DANCE };
 
 /** \brief Layer Actions
  */

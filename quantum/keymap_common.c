@@ -138,6 +138,11 @@ action_t action_for_keycode(uint16_t keycode) {
             action.code = ACTION(ACT_SWAP_HANDS, keycode & 0xff);
             break;
 #endif
+#ifdef TAP_DANCE_ENABLE
+        case QK_TAP_DANCE ... QK_TAP_DANCE_MAX:
+            action.code = ACTION(ACT_NO_EXT, NO_EXT_TAP_DANCE);
+            break;
+#endif
 
         default:
             action.code = ACTION_NO;

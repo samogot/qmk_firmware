@@ -28,6 +28,7 @@ typedef struct {
     uint16_t keycode;
     uint16_t interrupting_keycode;
     uint16_t timer;
+    uint8_t  oneshot_layer;
     bool     interrupted;
     bool     pressed;
     bool     finished;
