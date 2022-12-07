@@ -363,24 +363,23 @@ uint8_t dance_step(qk_tap_dance_state_t *state) {
 }
 
 void on_dance_0(qk_tap_dance_state_t *state, void *user_data) {
-    dance_state[0].step = get_oneshot_layer() << 3 | get_oneshot_layer_state();
-    reset_oneshot_layer();
+    bool osl_is_held = get_oneshot_layer_state() & ONESHOT_PRESSED;
+    dance_state[0].step = osl_is_held ? get_oneshot_layer() : 0;
 }
 
 void dance_0_finished(qk_tap_dance_state_t *state, void *user_data) {
-    uint8_t osl = dance_state[0].step >> 3;
-    uint8_t osl_state = dance_state[0].step & 0b111;
+    uint8_t held_osl = dance_state[0].step;
     dance_state[0].step = 0;
     if (state->count == 1 && state->pressed) {
         dance_state[0].step = SINGLE_HOLD;
     }
     if (dance_state[0].step == SINGLE_HOLD) {
-        if (osl_state) {
-            set_oneshot_layer(osl, osl_state);
-        }
         caps_word_off();
         register_code16(cmd_or_ctrl());
-    } else if (!osl_state) {
+    } else if (held_osl) {
+        reset_oneshot_layer();
+        layer_on(held_osl);
+    } else {
         layer_and(2);
     }
 }
