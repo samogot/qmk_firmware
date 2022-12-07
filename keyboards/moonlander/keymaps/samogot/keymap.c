@@ -267,17 +267,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return false;
         case KC_MS_WH_UP:
-            if ((get_mods() | get_weak_mods()) & MOD_MASK_CG) {
-                if (record->event.pressed) {
-                    tap_code(KC_C);
-                }
-                return false;
-            }
-            break;
         case KC_MS_WH_DOWN:
+        case KC_MS_WH_LEFT:
+//        case KC_MS_RIGHT:
             if ((get_mods() | get_weak_mods()) & MOD_MASK_CG) {
                 if (record->event.pressed) {
-                    tap_code(KC_V);
+                    tap_code(keymap_key_to_keycode(0, record->event.key));
                 }
                 return false;
             }
