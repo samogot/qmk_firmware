@@ -282,7 +282,7 @@ bool caps_word_press_user(uint16_t keycode) {
 enum combo_events { JK_ESC, THUMBS_TT_NAV, COMBO_LENGTH };
 uint16_t               COMBO_LEN      = COMBO_LENGTH;
 const uint16_t PROGMEM jk_combo[]     = {KC_J, KC_K, COMBO_END};
-const uint16_t PROGMEM tt_nav_combo[] = {CMD_OR_CTRL, OSL(2), COMBO_END};
+const uint16_t PROGMEM tt_nav_combo[] = {CMD_OR_CTRL, TD(DANCE_1), COMBO_END};
 combo_t                key_combos[]   = {
     [JK_ESC]        = COMBO(jk_combo, KC_ESC),
     [THUMBS_TT_NAV] = COMBO(tt_nav_combo, TT(4)),
@@ -346,24 +346,34 @@ void dance_0_reset(qk_tap_dance_state_t *state, void *user_data) {
     dance_state[0].step = 0;
 }
 
+void on_dance_1(qk_tap_dance_state_t *state, void *user_data) {
+    uint8_t current_layer = get_highest_layer(layer_state);
+    uint8_t target_layer  = current_layer < 2 ? 2 : current_layer + 1;
+    if (target_layer > 4 || state->count > 2) {
+        target_layer = 4;
+    }
+    dance_state[1].step = target_layer;
+    if (target_layer < 4) {
+        set_oneshot_layer(target_layer, ONESHOT_START);
+        layer_and(2 | (1 << target_layer));
+    } else {
+        reset_oneshot_layer();
+        layer_and(2);
+    }
+}
+
 void dance_1_finished(qk_tap_dance_state_t *state, void *user_data) {
-    dance_state[1].step = dance_step(state);
-    switch (dance_state[1].step) {
-        case SINGLE_TAP:
-            layer_move(2);
-            break;
-        case DOUBLE_TAP:
-            layer_move(3);
-            break;
-        case DOUBLE_SINGLE_TAP:
-            layer_move(2);
-            break;
+    uint8_t target_layer = dance_state[1].step;
+    if (state->count == 1 && target_layer == 4) {
+        layer_on(target_layer);
     }
 }
 
 void dance_1_reset(qk_tap_dance_state_t *state, void *user_data) {
-    wait_ms(10);
-    switch (dance_state[1].step) {}
+    uint8_t target_layer = dance_state[1].step;
+    if (target_layer < 4) {
+        clear_oneshot_layer_state(ONESHOT_PRESSED);
+    }
     dance_state[1].step = 0;
 }
 
@@ -408,9 +418,9 @@ void on_dance_3(qk_tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void dance_2_finished(qk_tap_dance_state_t *state, void *user_data) {
-    dance_state[2].step = dance_step(state);
-    switch (dance_state[2].step) {
+void dance_3_finished(qk_tap_dance_state_t *state, void *user_data) {
+    dance_state[3].step = dance_step(state);
+    switch (dance_state[3].step) {
         case SINGLE_TAP:
             tap_unicodemap_code(UA_30);
             break;
@@ -864,7 +874,7 @@ void dance_14_reset(qk_tap_dance_state_t *state, void *user_data) {
 
 qk_tap_dance_action_t tap_dance_actions[] = {
     [DANCE_0]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_0, dance_0_finished, dance_0_reset),
-    [DANCE_1]  = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_1_finished, NULL),
+    [DANCE_1]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_1, dance_1_finished, dance_1_reset),
     [DANCE_2]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_2, dance_2_finished, NULL),
     [DANCE_3]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_3, dance_3_finished, NULL),
     [DANCE_4]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_4, dance_4_finished, NULL),
@@ -872,7 +882,7 @@ qk_tap_dance_action_t tap_dance_actions[] = {
     [DANCE_6]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_6, dance_6_finished, NULL),
     [DANCE_7]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_7, dance_7_finished, NULL),
     [DANCE_8]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_8, dance_8_finished, NULL),
-    [DANCE_9]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_9, dance_9_finished, dance_9_reset),
+    [DANCE_9]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_9, dance_9_finished, NULL),
     [DANCE_10] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_10, dance_10_finished, dance_10_reset),
     [DANCE_11] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_11, dance_11_finished, dance_11_reset),
     [DANCE_12] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_12, dance_12_finished, dance_12_reset),
