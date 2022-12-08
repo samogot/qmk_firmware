@@ -234,6 +234,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 return false;
             }
             break;
+        case TT(4):
+            if (get_highest_layer(layer_state) == 4 && record->tap.count > 0) {
+                return false;
+            }
+            break;
     }
     return true;
 }
