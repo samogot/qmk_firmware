@@ -354,8 +354,11 @@ void on_dance_1(qk_tap_dance_state_t *state, void *user_data) {
     }
     dance_state[1].step = target_layer;
     if (target_layer < 4) {
+        bool orig_paired    = rawhid_state.paired;
+        rawhid_state.paired = false;
         set_oneshot_layer(target_layer, ONESHOT_START);
         layer_and(2 | (1 << target_layer));
+        rawhid_state.paired = orig_paired;
     } else {
         reset_oneshot_layer();
         layer_and(2);
@@ -364,7 +367,9 @@ void on_dance_1(qk_tap_dance_state_t *state, void *user_data) {
 
 void dance_1_finished(qk_tap_dance_state_t *state, void *user_data) {
     uint8_t target_layer = dance_state[1].step;
-    if (state->count == 1 && target_layer == 4) {
+    if (target_layer < 4) {
+        layer_state_set_oryx(1 << target_layer);
+    } else if (state->count == 1 && target_layer == 4) {
         layer_on(target_layer);
     }
 }
