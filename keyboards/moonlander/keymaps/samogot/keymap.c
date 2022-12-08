@@ -6,6 +6,7 @@
 enum custom_keycodes {
     RGB_SLD = ML_SAFE_RANGE,
     CMD_OR_CTRL,
+    CTRL_OR_WIN,
 };
 
 enum tap_dance_codes {
@@ -33,7 +34,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TAB,         KC_Q,           KC_W,           KC_E,           KC_R,           KC_T,           KC_TRANSPARENT,                                 KC_TRANSPARENT, KC_Y,           KC_U,           KC_I,           KC_O,           KC_P,           KC_BSLASH,
     TG(1),          KC_A,           KC_S,           KC_D,           KC_F,           KC_G,           KC_DELETE,                                      KC_BSPACE,      KC_H,           KC_J,           KC_K,           KC_L,           KC_SCOLON,      KC_QUOTE,
     KC_LSHIFT,      KC_Z,           KC_X,           KC_C,           KC_V,           KC_B,                                                                           KC_N,           KC_M,           KC_COMMA,       KC_DOT,         KC_SLASH,       KC_RSHIFT,
-    KC_LCTRL,       KC_LALT,        KC_LGUI,        KC_LALT,        CMD_OR_CTRL,                    KC_ESCAPE,                                      KC_ENTER,                       TD(DANCE_1),    KC_RCTRL,       KC_RGUI,        KC_RALT,        KC_RCTRL,
+    KC_LCTRL,       KC_LALT,        KC_LGUI,        KC_LALT,        CMD_OR_CTRL,                    KC_ESCAPE,                                      KC_ENTER,                       TD(DANCE_1),    CTRL_OR_WIN,    KC_RGUI,        KC_RALT,        KC_RCTRL,
                                                                     ALL_T(KC_SPACE),SH_OS,          UC_MOD,                                         KC_APPLICATION, CAPS_WORD,      OSM(MOD_RSFT)
   ),
   [1] = LAYOUT_moonlander(
@@ -196,6 +197,14 @@ uint8_t cmd_or_ctrl(void) {
     }
 }
 
+uint8_t ctrl_or_win(void) {
+    if (get_unicode_input_mode() == UC_MAC) {
+        return KC_LCTRL;
+    } else {
+        return KC_LWIN;
+    }
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case RGB_SLD:
@@ -221,6 +230,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 register_code(cmd_or_ctrl());
             } else {
                 unregister_code(cmd_or_ctrl());
+            }
+            return false;
+        case CTRL_OR_WIN:
+            if (record->event.pressed) {
+                register_code(ctrl_or_win());
+            } else {
+                unregister_code(ctrl_or_win());
             }
             return false;
         case KC_MS_WH_UP:
