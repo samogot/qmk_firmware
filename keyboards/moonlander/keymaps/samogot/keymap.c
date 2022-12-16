@@ -178,15 +178,20 @@ void caps_word_set_user(bool active) {
     ML_LED_6(active);
 }
 
-void tap_unicodemap_code_or_latin(uint16_t keycode, uint8_t latin_replacement) {
+void tap_unicodemap_code_or_layout_change(uint16_t keycode, uint8_t other_layout_code) {
     if (get_unicode_input_mode() != UC_MAC) {
         tap_unicodemap_code(keycode);
     } else {
+        tap_code16(HYPR(KC_1));
+        wait_ms(40);
         if (is_caps_word_on()) {
-            tap_code16(LSFT(latin_replacement));
+            tap_code16(LSFT(other_layout_code));
         } else {
-            tap_code(latin_replacement);
+            tap_code(other_layout_code);
         }
+        wait_ms(10);
+        tap_code16(HYPR(KC_0));
+        wait_ms(10);
     }
 }
 
@@ -216,12 +221,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         case UA_28:
             if (record->event.pressed) {
-                tap_unicodemap_code_or_latin(UA_28, KC_A);
+                tap_unicodemap_code_or_layout_change(UA_28, KC_F);
             }
             return false;
         case UA_26:
             if (record->event.pressed) {
-                tap_unicodemap_code_or_latin(UA_26, KC_P);
+                tap_unicodemap_code_or_layout_change(UA_26, KC_H);
             }
             return false;
         case UC_MOD:
@@ -483,7 +488,7 @@ void dance_4_finished(qk_tap_dance_state_t *state, void *user_data) {
             tap_unicodemap_code(UA_38);
             break;
         case SINGLE_HOLD:
-            tap_unicodemap_code(UA_37);
+            tap_unicodemap_code_or_layout_change(UA_37, KC_GRAVE);
             break;
         case DOUBLE_TAP:
             tap_unicodemap_code(UA_38);
