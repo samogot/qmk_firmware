@@ -6,5 +6,4 @@ ORYX_ENABLE = yes
 TAP_DANCE_ENABLE = yes
 SPACE_CADET_ENABLE = no
 CAPS_WORD_ENABLE = yes
-
 SRC = matrix.c
