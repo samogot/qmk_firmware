@@ -72,7 +72,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 /* clang-format on */
 
-
 extern rgb_config_t rgb_matrix_config;
 
 void keyboard_post_init_user(void) {
@@ -213,7 +212,6 @@ uint8_t ctrl_or_win(void) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-
         case RGB_SLD:
             if (record->event.pressed) {
                 rgblight_mode(1);
@@ -381,6 +379,10 @@ void on_dance_1(qk_tap_dance_state_t *state, void *user_data) {
         target_layer = 4;
     }
     dance_state[1].step = target_layer;
+    if (current_layer == 4) {
+        send_char('\a');
+        return;
+    }
     if (target_layer < 4) {
         bool orig_paired    = rawhid_state.paired;
         rawhid_state.paired = false;
