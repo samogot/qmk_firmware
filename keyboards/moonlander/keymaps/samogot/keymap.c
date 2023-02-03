@@ -255,8 +255,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 return false;
             }
             break;
-        case TT(4):
-            if (get_highest_layer(layer_state) == 4 && record->tap.count > 0) {
+        case TT(2):
+            layer_and(6);
+            reset_oneshot_layer();
+            if (get_highest_layer(layer_state) >= 2 && record->tap.count > 0) {
                 return false;
             }
             break;
@@ -310,8 +312,8 @@ uint16_t               COMBO_LEN      = COMBO_LENGTH;
 const uint16_t PROGMEM jk_combo[]     = {KC_J, KC_K, COMBO_END};
 const uint16_t PROGMEM tt_nav_combo[] = {CMD_OR_CTRL, TD(DANCE_1), COMBO_END};
 combo_t                key_combos[]   = {
-    [JK_ESC]        = COMBO(jk_combo, KC_ESC),
-    [THUMBS_TT_NAV] = COMBO(tt_nav_combo, TT(4)),
+                     [JK_ESC]        = COMBO(jk_combo, KC_ESC),
+                     [THUMBS_TT_NAV] = COMBO(tt_nav_combo, TT(2)),
 };
 
 typedef struct {
@@ -374,41 +376,25 @@ void dance_0_reset(qk_tap_dance_state_t *state, void *user_data) {
 
 void on_dance_1(qk_tap_dance_state_t *state, void *user_data) {
     uint8_t current_layer = get_highest_layer(layer_state);
-    uint8_t target_layer  = current_layer < 2 ? 2 : current_layer + 1;
-    if (target_layer > 4 || state->count > 2) {
-        target_layer = 4;
-    }
-    dance_state[1].step = target_layer;
-    if (current_layer == 4) {
-        send_char('\a');
-        return;
-    }
-    if (target_layer < 4) {
-        bool orig_paired    = rawhid_state.paired;
-        rawhid_state.paired = false;
-        set_oneshot_layer(target_layer, ONESHOT_START);
-        layer_and(2 | (1 << target_layer));
-        rawhid_state.paired = orig_paired;
+    uint8_t current_mode  = current_layer < 2 ? 0 : current_layer - 2;
+    uint8_t target_mode   = (current_mode + 1) % 3;
+    bool    orig_paired   = rawhid_state.paired;
+    rawhid_state.paired   = false;
+    clear_oneshot_layer_state(ONESHOT_START);
+    if (target_mode > 0) {
+        set_oneshot_layer(target_mode + 2, ONESHOT_START);
     } else {
-        reset_oneshot_layer();
-        layer_and(2);
+        layer_invert(2);
     }
+    rawhid_state.paired = orig_paired;
 }
 
 void dance_1_finished(qk_tap_dance_state_t *state, void *user_data) {
-    dance_state[1].step = dance_step(state);
-    switch (dance_state[1].step) {
-        case SINGLE_TAP: layer_move(2); break;
-        case DOUBLE_TAP: layer_move(3); break;
-        case DOUBLE_SINGLE_TAP: layer_move(2); break;
-    }
+    layer_state_set_oryx(layer_state);
 }
 
 void dance_1_reset(qk_tap_dance_state_t *state, void *user_data) {
-    uint8_t target_layer = dance_state[1].step;
-    if (target_layer < 4) {
-        clear_oneshot_layer_state(ONESHOT_PRESSED);
-    }
+    clear_oneshot_layer_state(ONESHOT_PRESSED);
     dance_state[1].step = 0;
 }
 
