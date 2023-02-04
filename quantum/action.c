@@ -283,10 +283,12 @@ void process_record_handler(keyrecord_t *record) {
     dprint("ACTION: ");
     debug_action(action);
 #ifndef NO_ACTION_LAYER
+#   ifdef DEBUG_ACTION
     dprint(" layer_state: ");
     layer_debug();
     dprint(" default_layer_state: ");
     default_layer_debug();
+#   endif
 #endif
     dprintln();
 
