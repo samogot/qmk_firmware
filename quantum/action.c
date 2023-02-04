@@ -106,8 +106,9 @@ void action_exec(keyevent_t event) {
         if (has_oneshot_layer_timed_out()) {
             clear_oneshot_layer_state(ONESHOT_OTHER_KEY_PRESSED);
         }
-        if (has_oneshot_mods_timed_out()) {
+        if (get_oneshot_mods() && has_oneshot_mods_timed_out()) {
             clear_oneshot_mods();
+            send_keyboard_report();
         }
 #        ifdef SWAP_HANDS_ENABLE
         if (has_oneshot_swaphands_timed_out()) {
@@ -415,6 +416,7 @@ void process_action(keyrecord_t *record, action_t action) {
                             }
                         } else {
                             if (tap_count == 0) {
+                                printf("Oneshot: release\n");
                                 clear_oneshot_mods();
                                 unregister_mods(mods);
                             } else if (tap_count == 1) {
@@ -429,6 +431,7 @@ void process_action(keyrecord_t *record, action_t action) {
                                 // Toggle Oneshot Layer
 #        endif
                             } else {
+                                printf("Oneshot: release\n");
                                 clear_oneshot_mods();
                                 unregister_mods(mods);
                             }

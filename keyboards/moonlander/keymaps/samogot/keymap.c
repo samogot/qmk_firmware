@@ -5,8 +5,6 @@
 
 enum custom_keycodes {
     RGB_SLD = ML_SAFE_RANGE,
-    CMD_OR_CTRL,
-    CTRL_OR_WIN,
 };
 
 enum tap_dance_codes {
@@ -25,6 +23,10 @@ enum tap_dance_codes {
     DANCE_12,
     DANCE_13,
     DANCE_14,
+    DANCE_ALT,
+    CMD_OR_CTRL,
+    CTRL_OR_WIN,
+    DANCE_SHIFT,
 };
 
 /* clang-format off */
@@ -34,8 +36,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TAB,         KC_Q,           KC_W,           KC_E,           KC_R,           KC_T,           KC_TRANSPARENT,                                 KC_TRANSPARENT, KC_Y,           KC_U,           KC_I,           KC_O,           KC_P,           KC_BSLASH,
     TG(1),          KC_A,           KC_S,           KC_D,           KC_F,           KC_G,           KC_DELETE,                                      KC_BSPACE,      KC_H,           KC_J,           KC_K,           KC_L,           KC_SCOLON,      KC_QUOTE,
     KC_LSHIFT,      KC_Z,           KC_X,           KC_C,           KC_V,           KC_B,                                                                           KC_N,           KC_M,           KC_COMMA,       KC_DOT,         KC_SLASH,       KC_RSHIFT,
-    KC_LCTRL,       KC_LALT,        KC_LGUI,        KC_LALT,        CMD_OR_CTRL,                    KC_ESCAPE,                                      KC_ENTER,                       TD(DANCE_1),    CTRL_OR_WIN,    KC_RGUI,        KC_RALT,        KC_RCTRL,
-                                                                    ALL_T(KC_SPACE),SH_OS,          UC_MOD,                                         KC_APPLICATION, CAPS_WORD,      OSM(MOD_RSFT)
+    KC_LCTRL,       KC_LALT,        KC_LGUI,        TD(DANCE_ALT),  TD(CMD_OR_CTRL),                KC_ESCAPE,                                      KC_ENTER,                       TD(DANCE_1),    TD(CTRL_OR_WIN),KC_RGUI,        KC_RALT,        KC_RCTRL,
+                                                                    ALL_T(KC_SPACE),SH_OS,          UC_MOD,                                         KC_APPLICATION, SH_OS,          TD(DANCE_SHIFT)
   ),
   [1] = LAYOUT_moonlander(
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,                                 KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
@@ -204,9 +206,9 @@ uint8_t cmd_or_ctrl(void) {
 
 uint8_t ctrl_or_win(void) {
     if (get_unicode_input_mode() == UC_MAC) {
-        return KC_LCTRL;
+        return KC_RCTRL;
     } else {
-        return KC_LWIN;
+        return KC_RWIN;
     }
 }
 
@@ -230,20 +232,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case UC_MOD:
             ML_LED_5((get_unicode_input_mode() == UC_WINC));
             return true;
-        case CMD_OR_CTRL:
-            if (record->event.pressed) {
-                register_code(cmd_or_ctrl());
-            } else {
-                unregister_code(cmd_or_ctrl());
-            }
-            return false;
-        case CTRL_OR_WIN:
-            if (record->event.pressed) {
-                register_code(ctrl_or_win());
-            } else {
-                unregister_code(ctrl_or_win());
-            }
-            return false;
         case KC_MS_WH_UP:
         case KC_MS_WH_DOWN:
         case KC_MS_WH_LEFT:
@@ -268,11 +256,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 uint16_t keymap_key_to_keycode(uint8_t layer, keypos_t key) {
     if (layer == 1) {
-        uint8_t mods = get_mods() | get_weak_mods();
-
-#ifndef NO_ACTION_ONESHOT
-        mods |= get_oneshot_mods();
-#endif
+        uint8_t mods = get_mods() | get_weak_mods() | get_oneshot_mods();
         if (mods & ~MOD_MASK_SHIFT) {
             return KC_TRANSPARENT;
         }
@@ -289,7 +273,7 @@ bool caps_word_press_user(uint16_t keycode) {
         case KC_A ... KC_Z:
         case KC_MINS:
         case QK_UNICODEMAP ... QK_UNICODEMAP_PAIR_MAX:
-        case TD(DANCE_1)... TD(DANCE_8):
+        case TD(DANCE_2)... TD(DANCE_9):
             add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
             send_keyboard_report();
             return true;
@@ -300,6 +284,7 @@ bool caps_word_press_user(uint16_t keycode) {
         case KC_DEL:
         case KC_UNDS:
         case TD(DANCE_0):
+        case TD(DANCE_1):
             return true;
 
         default:
@@ -310,7 +295,7 @@ bool caps_word_press_user(uint16_t keycode) {
 enum combo_events { JK_ESC, THUMBS_TT_NAV, COMBO_LENGTH };
 uint16_t               COMBO_LEN      = COMBO_LENGTH;
 const uint16_t PROGMEM jk_combo[]     = {KC_J, KC_K, COMBO_END};
-const uint16_t PROGMEM tt_nav_combo[] = {CMD_OR_CTRL, TD(DANCE_1), COMBO_END};
+const uint16_t PROGMEM tt_nav_combo[] = {TD(CMD_OR_CTRL), TD(DANCE_1), COMBO_END};
 combo_t                key_combos[]   = {
                      [JK_ESC]        = COMBO(jk_combo, KC_ESC),
                      [THUMBS_TT_NAV] = COMBO(tt_nav_combo, TT(2)),
@@ -323,7 +308,7 @@ typedef struct {
 
 enum { SINGLE_TAP = 1, SINGLE_HOLD, DOUBLE_TAP, DOUBLE_HOLD, DOUBLE_SINGLE_TAP, MORE_TAPS };
 
-static tap dance_state[15];
+static tap dance_state[19];
 
 uint8_t dance_step(qk_tap_dance_state_t *state);
 
@@ -357,7 +342,7 @@ void dance_0_finished(qk_tap_dance_state_t *state, void *user_data) {
     }
     if (dance_state[0].step == SINGLE_HOLD) {
         caps_word_off();
-        register_code16(cmd_or_ctrl());
+        register_code(cmd_or_ctrl());
     } else if (held_osl) {
         reset_oneshot_layer();
         layer_on(held_osl);
@@ -369,7 +354,7 @@ void dance_0_finished(qk_tap_dance_state_t *state, void *user_data) {
 void dance_0_reset(qk_tap_dance_state_t *state, void *user_data) {
     wait_ms(10);
     if (dance_state[0].step == SINGLE_HOLD) {
-        unregister_code16(cmd_or_ctrl());
+        unregister_code(cmd_or_ctrl());
     }
     dance_state[0].step = 0;
 }
@@ -396,6 +381,156 @@ void dance_1_finished(qk_tap_dance_state_t *state, void *user_data) {
 void dance_1_reset(qk_tap_dance_state_t *state, void *user_data) {
     clear_oneshot_layer_state(ONESHOT_PRESSED);
     dance_state[1].step = 0;
+}
+
+void on_dance_15_alt(qk_tap_dance_state_t *state, void *user_data) {
+    uint8_t code = KC_LALT;
+    if (state->count == 3) {
+        tap_code(code);
+        tap_code(code);
+        tap_code(code);
+    }
+    if (state->count > 3) {
+        tap_code(code);
+    }
+}
+
+void dance_15_alt_finished(qk_tap_dance_state_t *state, void *user_data) {
+    uint8_t code = KC_LALT;
+    dance_state[15].step = dance_step(state);
+    switch (dance_state[15].step) {
+        case SINGLE_TAP:
+        case SINGLE_HOLD:
+            register_code(code);
+            add_oneshot_mods(MOD_BIT(code));
+            break;
+        case DOUBLE_TAP:
+        case DOUBLE_SINGLE_TAP:
+        case DOUBLE_HOLD:
+            tap_code(code);
+            register_code(code);
+            break;
+    }
+}
+
+void dance_15_alt_reset(qk_tap_dance_state_t *state, void *user_data) {
+    wait_ms(10);
+    unregister_code(KC_LALT);
+    dance_state[15].step = 0;
+}
+
+void on_dance_16_cmd_or_ctrl(qk_tap_dance_state_t *state, void *user_data) {
+    uint8_t code = cmd_or_ctrl();
+    if (state->count == 3) {
+        tap_code(code);
+        tap_code(code);
+        tap_code(code);
+    }
+    if (state->count > 3) {
+        tap_code(code);
+    }
+}
+
+void dance_16_cmd_or_ctrl_finished(qk_tap_dance_state_t *state, void *user_data) {
+    uint8_t code = cmd_or_ctrl();
+    dance_state[16].step = dance_step(state);
+    switch (dance_state[16].step) {
+        case SINGLE_TAP:
+            if (!state->interrupted) {
+                send_string("\a");
+            }
+            // fall through
+        case SINGLE_HOLD:
+            register_code(code);
+            add_oneshot_mods(MOD_BIT(code));
+            break;
+        case DOUBLE_TAP:
+        case DOUBLE_SINGLE_TAP:
+        case DOUBLE_HOLD:
+            tap_code(code);
+            register_code(code);
+            break;
+    }
+}
+
+void dance_16_cmd_or_ctrl_reset(qk_tap_dance_state_t *state, void *user_data) {
+    wait_ms(10);
+    unregister_code(cmd_or_ctrl());
+    dance_state[16].step = 0;
+}
+
+void on_dance_17_ctrl_or_win(qk_tap_dance_state_t *state, void *user_data) {
+    uint8_t code = ctrl_or_win();
+    if (state->count == 3) {
+        tap_code(code);
+        tap_code(code);
+        tap_code(code);
+    }
+    if (state->count > 3) {
+        tap_code(code);
+    }
+}
+
+void dance_17_ctrl_or_win_finished(qk_tap_dance_state_t *state, void *user_data) {
+    uint8_t code = ctrl_or_win();
+    dance_state[17].step = dance_step(state);
+    switch (dance_state[17].step) {
+        case SINGLE_TAP:
+        case SINGLE_HOLD:
+            register_code(code);
+            add_oneshot_mods(MOD_BIT(code));
+            break;
+        case DOUBLE_TAP:
+        case DOUBLE_SINGLE_TAP:
+        case DOUBLE_HOLD:
+            tap_code(code);
+            register_code(code);
+            break;
+    }
+}
+
+void dance_17_ctrl_or_win_reset(qk_tap_dance_state_t *state, void *user_data) {
+    wait_ms(10);
+    unregister_code(ctrl_or_win());
+    dance_state[17].step = 0;
+}
+
+void on_dance_18_shift_caps_word(qk_tap_dance_state_t *state, void *user_data) {
+    uint8_t code = KC_RSHIFT;
+    if (state->count == 3) {
+        tap_code(code);
+        tap_code(code);
+        tap_code(code);
+    }
+    if (state->count > 3) {
+        tap_code(code);
+    }
+}
+
+void dance_18_shift_caps_word_finished(qk_tap_dance_state_t *state, void *user_data) {
+    uint8_t code = KC_RSHIFT;
+    dance_state[18].step = dance_step(state);
+    switch (dance_state[18].step) {
+        case SINGLE_TAP:
+        case SINGLE_HOLD:
+            register_code(code);
+            add_oneshot_mods(MOD_BIT(code));
+            break;
+        case DOUBLE_TAP:
+        case DOUBLE_SINGLE_TAP:
+            tap_code(code);
+            register_code(code);
+            break;
+        case DOUBLE_HOLD:
+            caps_word_on();
+            break;
+    }
+}
+
+void dance_18_shift_caps_word_reset(qk_tap_dance_state_t *state, void *user_data) {
+    wait_ms(10);
+    unregister_code(KC_RSHIFT);
+    dance_state[18].step = 0;
 }
 
 void on_dance_2(qk_tap_dance_state_t *state, void *user_data) {
@@ -907,4 +1042,8 @@ qk_tap_dance_action_t tap_dance_actions[] = {
     [DANCE_12] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_12, dance_12_finished, dance_12_reset),
     [DANCE_13] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_13, dance_13_finished, dance_13_reset),
     [DANCE_14] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_14, dance_14_finished, dance_14_reset),
+    [DANCE_ALT]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_15_alt, dance_15_alt_finished, dance_15_alt_reset),
+    [CMD_OR_CTRL]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_16_cmd_or_ctrl, dance_16_cmd_or_ctrl_finished, dance_16_cmd_or_ctrl_reset),
+    [CTRL_OR_WIN]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_17_ctrl_or_win, dance_17_ctrl_or_win_finished, dance_17_ctrl_or_win_reset),
+    [DANCE_SHIFT]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_18_shift_caps_word, dance_18_shift_caps_word_finished, dance_18_shift_caps_word_reset),
 };
