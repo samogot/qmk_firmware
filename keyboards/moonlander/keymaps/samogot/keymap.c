@@ -236,7 +236,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case KC_MS_WH_DOWN:
         case KC_MS_WH_LEFT:
             //        case KC_MS_RIGHT:
-            if ((get_mods() | get_weak_mods()) & MOD_MASK_CG) {
+            if ((get_mods() | get_weak_mods() | get_oneshot_mods()) & MOD_MASK_CG) {
                 if (record->event.pressed) {
                     tap_code(keymap_key_to_keycode(0, record->event.key));
                 }
@@ -437,6 +437,7 @@ void dance_16_cmd_or_ctrl_finished(qk_tap_dance_state_t *state, void *user_data)
     switch (dance_state[16].step) {
         case SINGLE_TAP:
             if (!state->interrupted) {
+                layer_state_set_oryx(layer_state);
                 send_string("\a");
             }
             // fall through
