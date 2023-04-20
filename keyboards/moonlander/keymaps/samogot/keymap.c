@@ -250,6 +250,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 return false;
             }
             break;
+        case KC_NO:
+            if (record->event.pressed) {
+                send_string("\a");
+            }
+            break;
     }
     return true;
 }
