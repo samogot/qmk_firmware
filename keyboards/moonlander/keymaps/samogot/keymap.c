@@ -396,7 +396,7 @@ void on_dance_15_alt(qk_tap_dance_state_t *state, void *user_data) {
 }
 
 void dance_15_alt_finished(qk_tap_dance_state_t *state, void *user_data) {
-    uint8_t code = KC_LALT;
+    uint8_t code         = KC_LALT;
     dance_state[15].step = dance_step(state);
     switch (dance_state[15].step) {
         case SINGLE_TAP:
@@ -432,18 +432,13 @@ void on_dance_16_cmd_or_ctrl(qk_tap_dance_state_t *state, void *user_data) {
 }
 
 void dance_16_cmd_or_ctrl_finished(qk_tap_dance_state_t *state, void *user_data) {
-    uint8_t code = cmd_or_ctrl();
+    uint8_t code         = cmd_or_ctrl();
     dance_state[16].step = dance_step(state);
     switch (dance_state[16].step) {
         case SINGLE_TAP:
-            if (!state->interrupted) {
-                layer_state_set_oryx(layer_state);
-                send_string("\a");
-            }
-            // fall through
         case SINGLE_HOLD:
+            layer_state_set_oryx(layer_state);
             register_code(code);
-            add_oneshot_mods(MOD_BIT(code));
             break;
         case DOUBLE_TAP:
         case DOUBLE_SINGLE_TAP:
@@ -473,7 +468,7 @@ void on_dance_17_ctrl_or_win(qk_tap_dance_state_t *state, void *user_data) {
 }
 
 void dance_17_ctrl_or_win_finished(qk_tap_dance_state_t *state, void *user_data) {
-    uint8_t code = ctrl_or_win();
+    uint8_t code         = ctrl_or_win();
     dance_state[17].step = dance_step(state);
     switch (dance_state[17].step) {
         case SINGLE_TAP:
@@ -509,7 +504,7 @@ void on_dance_18_shift_caps_word(qk_tap_dance_state_t *state, void *user_data) {
 }
 
 void dance_18_shift_caps_word_finished(qk_tap_dance_state_t *state, void *user_data) {
-    uint8_t code = KC_RSHIFT;
+    uint8_t code         = KC_RSHIFT;
     dance_state[18].step = dance_step(state);
     switch (dance_state[18].step) {
         case SINGLE_TAP:
@@ -1028,23 +1023,23 @@ void dance_14_reset(qk_tap_dance_state_t *state, void *user_data) {
 }
 
 qk_tap_dance_action_t tap_dance_actions[] = {
-    [DANCE_0]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_0, dance_0_finished, dance_0_reset),
-    [DANCE_1]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_1, dance_1_finished, dance_1_reset),
-    [DANCE_2]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_2, dance_2_finished, NULL),
-    [DANCE_3]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_3, dance_3_finished, NULL),
-    [DANCE_4]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_4, dance_4_finished, NULL),
-    [DANCE_5]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_5, dance_5_finished, NULL),
-    [DANCE_6]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_6, dance_6_finished, NULL),
-    [DANCE_7]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_7, dance_7_finished, NULL),
-    [DANCE_8]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_8, dance_8_finished, NULL),
-    [DANCE_9]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_9, dance_9_finished, NULL),
-    [DANCE_10] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_10, dance_10_finished, dance_10_reset),
-    [DANCE_11] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_11, dance_11_finished, dance_11_reset),
-    [DANCE_12] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_12, dance_12_finished, dance_12_reset),
-    [DANCE_13] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_13, dance_13_finished, dance_13_reset),
-    [DANCE_14] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_14, dance_14_finished, dance_14_reset),
-    [DANCE_ALT]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_15_alt, dance_15_alt_finished, dance_15_alt_reset),
-    [CMD_OR_CTRL]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_16_cmd_or_ctrl, dance_16_cmd_or_ctrl_finished, dance_16_cmd_or_ctrl_reset),
-    [CTRL_OR_WIN]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_17_ctrl_or_win, dance_17_ctrl_or_win_finished, dance_17_ctrl_or_win_reset),
-    [DANCE_SHIFT]  = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_18_shift_caps_word, dance_18_shift_caps_word_finished, dance_18_shift_caps_word_reset),
+    [DANCE_0]     = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_0, dance_0_finished, dance_0_reset),
+    [DANCE_1]     = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_1, dance_1_finished, dance_1_reset),
+    [DANCE_2]     = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_2, dance_2_finished, NULL),
+    [DANCE_3]     = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_3, dance_3_finished, NULL),
+    [DANCE_4]     = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_4, dance_4_finished, NULL),
+    [DANCE_5]     = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_5, dance_5_finished, NULL),
+    [DANCE_6]     = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_6, dance_6_finished, NULL),
+    [DANCE_7]     = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_7, dance_7_finished, NULL),
+    [DANCE_8]     = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_8, dance_8_finished, NULL),
+    [DANCE_9]     = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_9, dance_9_finished, NULL),
+    [DANCE_10]    = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_10, dance_10_finished, dance_10_reset),
+    [DANCE_11]    = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_11, dance_11_finished, dance_11_reset),
+    [DANCE_12]    = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_12, dance_12_finished, dance_12_reset),
+    [DANCE_13]    = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_13, dance_13_finished, dance_13_reset),
+    [DANCE_14]    = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_14, dance_14_finished, dance_14_reset),
+    [DANCE_ALT]   = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_15_alt, dance_15_alt_finished, dance_15_alt_reset),
+    [CMD_OR_CTRL] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_16_cmd_or_ctrl, dance_16_cmd_or_ctrl_finished, dance_16_cmd_or_ctrl_reset),
+    [CTRL_OR_WIN] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_17_ctrl_or_win, dance_17_ctrl_or_win_finished, dance_17_ctrl_or_win_reset),
+    [DANCE_SHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_18_shift_caps_word, dance_18_shift_caps_word_finished, dance_18_shift_caps_word_reset),
 };
