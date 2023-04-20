@@ -297,13 +297,15 @@ bool caps_word_press_user(uint16_t keycode) {
     }
 }
 
-enum combo_events { JK_ESC, THUMBS_TT_NAV, COMBO_LENGTH };
+enum combo_events { JK_ESC, THUMBS_TT_NAV, DF_TO_MAIN, COMBO_LENGTH };
 uint16_t               COMBO_LEN      = COMBO_LENGTH;
 const uint16_t PROGMEM jk_combo[]     = {KC_J, KC_K, COMBO_END};
 const uint16_t PROGMEM tt_nav_combo[] = {TD(CMD_OR_CTRL), TD(DANCE_1), COMBO_END};
+const uint16_t PROGMEM df_combo[]     = {TD(CMD_OR_CTRL), KC_F, COMBO_END};
 combo_t                key_combos[]   = {
                      [JK_ESC]        = COMBO(jk_combo, KC_ESC),
                      [THUMBS_TT_NAV] = COMBO(tt_nav_combo, TT(2)),
+                     [DF_TO_MAIN]    = COMBO(df_combo, TO(0)),
 };
 
 typedef struct {
@@ -352,7 +354,7 @@ void dance_0_finished(qk_tap_dance_state_t *state, void *user_data) {
         reset_oneshot_layer();
         layer_on(held_osl);
     } else {
-        layer_and(2);
+        send_string("\a");
     }
 }
 
