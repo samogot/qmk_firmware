@@ -2,6 +2,7 @@
 #include "keymap_nordic.h"
 #include "unicodemap_keymap_russian.h"
 #include "unicodemap_keymap_ukrainian.h"
+#include "mousekey.h"
 
 enum custom_keycodes {
     RGB_SLD = ML_SAFE_RANGE,
@@ -296,6 +297,33 @@ bool caps_word_press_user(uint16_t keycode) {
             return false; // Deactivate Caps Word.
     }
 }
+
+#define NAV_LAYER_TIMEOUT 30000
+#ifdef NAV_LAYER_TIMEOUT
+static uint16_t nav_layer_timer = 0;
+
+static void reset_nav_layer_timer(void) {
+    nav_layer_timer = timer_read();
+}
+static void check_nav_layer_timer(void) {
+    if (get_highest_layer(layer_state) != 2) {
+        return;
+    }
+    if (is_mousekey_pressed()) {
+        reset_nav_layer_timer();
+        return;
+    }
+    if (TIMER_DIFF_16(timer_read(), nav_layer_timer) >= NAV_LAYER_TIMEOUT) {
+        layer_and(2);
+    }
+}
+void housekeeping_task_user(void) {
+    check_nav_layer_timer();
+}
+void post_process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (record->event.pressed) reset_nav_layer_timer();
+}
+#endif
 
 enum combo_events { JK_ESC, THUMBS_TT_NAV, DF_TO_MAIN, COMBO_LENGTH };
 uint16_t               COMBO_LEN      = COMBO_LENGTH;
