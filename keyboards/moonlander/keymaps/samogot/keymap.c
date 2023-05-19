@@ -362,35 +362,23 @@ uint8_t dance_step(qk_tap_dance_state_t *state) {
 }
 
 void on_dance_0(qk_tap_dance_state_t *state, void *user_data) {
-    bool osl_is_held    = get_oneshot_layer_state() & ONESHOT_PRESSED;
-    dance_state[0].step = osl_is_held ? get_oneshot_layer() : 0;
-}
-
-void dance_0_finished(qk_tap_dance_state_t *state, void *user_data) {
-    uint8_t held_osl    = dance_state[0].step;
-    dance_state[0].step = 0;
-    if (state->count == 1 && state->pressed) {
-        dance_state[0].step = SINGLE_HOLD;
-    }
-    if (dance_state[0].step == SINGLE_HOLD) {
-        send_string("\a");
-        //        caps_word_off();
-        //        register_code(cmd_or_ctrl());
-    } else if (held_osl) {
+    bool osl_is_held = get_oneshot_layer_state() & ONESHOT_PRESSED;
+    if (osl_is_held) {
+        uint8_t layer = get_oneshot_layer();
         reset_oneshot_layer();
-        layer_on(held_osl);
+        layer_on(layer);
     } else {
         layer_and(2);
     }
 }
 
-void dance_0_reset(qk_tap_dance_state_t *state, void *user_data) {
-    wait_ms(10);
-    //    if (dance_state[0].step == SINGLE_HOLD) {
-    //        unregister_code(cmd_or_ctrl());
-    //    }
-    dance_state[0].step = 0;
+void dance_0_finished(qk_tap_dance_state_t *state, void *user_data) {
+    if (state->pressed || state->count > 1) {
+        send_string("\a");
+    }
 }
+
+void dance_0_reset(qk_tap_dance_state_t *state, void *user_data) {}
 
 void on_dance_1(qk_tap_dance_state_t *state, void *user_data) {
     uint8_t current_layer = get_highest_layer(layer_state);
