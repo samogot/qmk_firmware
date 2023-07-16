@@ -6,6 +6,7 @@
 
 enum custom_keycodes {
     RGB_SLD = ML_SAFE_RANGE,
+    ESC_TG0,
 };
 
 enum tap_dance_codes {
@@ -255,6 +256,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 send_string("\a");
             }
             break;
+        case ESC_TG0:
+            if (record->event.pressed) {
+                tap_code(KC_ESCAPE);
+                layer_and(2);
+            }
+            break;
     }
     return true;
 }
@@ -329,7 +336,7 @@ uint16_t               COMBO_LEN      = COMBO_LENGTH;
 const uint16_t PROGMEM jk_combo[]     = {KC_J, KC_K, COMBO_END};
 const uint16_t PROGMEM tt_nav_combo[] = {TD(DANCE_0), TD(DANCE_1), COMBO_END};
 combo_t                key_combos[]   = {
-    [JK_ESC]        = COMBO(jk_combo, KC_ESC),
+    [JK_ESC]        = COMBO(jk_combo, ESC_TG0),
     [THUMBS_TT_NAV] = COMBO(tt_nav_combo, TT(2)),
 };
 
