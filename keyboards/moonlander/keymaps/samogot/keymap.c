@@ -24,7 +24,7 @@ enum tap_dance_codes {
     DANCE_12,
     DANCE_13,
     DANCE_14,
-    CMD_OR_CTRL,
+    CMDCTRL_ALT,
     CTRLWIN_ALT,
     DANCE_SHIFT,
 };
@@ -36,7 +36,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TAB,         KC_Q,           KC_W,           KC_E,           KC_R,           KC_T,           KC_TRANSPARENT,                                 KC_TRANSPARENT, KC_Y,           KC_U,           KC_I,           KC_O,           KC_P,           KC_BSLASH,
     TG(1),          KC_A,           KC_S,           KC_D,           KC_F,           KC_G,           KC_DELETE,                                      KC_BSPACE,      KC_H,           KC_J,           KC_K,           KC_L,           KC_SCOLON,      KC_QUOTE,
     KC_LSHIFT,      KC_Z,           KC_X,           KC_C,           KC_V,           KC_B,                                                                           KC_N,           KC_M,           KC_COMMA,       KC_DOT,         KC_SLASH,       KC_RSHIFT,
-    KC_LCTRL,       KC_LALT,        KC_LGUI,        TD(CMD_OR_CTRL),TD(DANCE_0),                    KC_ESCAPE,                                      KC_ENTER,                       TD(DANCE_1),    TD(CTRLWIN_ALT),KC_RGUI,        KC_RALT,        KC_RCTRL,
+    KC_LCTRL,       KC_LALT,        KC_LGUI,        TD(CMDCTRL_ALT),TD(DANCE_0),                    KC_ESCAPE,                                      KC_ENTER,                       TD(DANCE_1),    TD(CTRLWIN_ALT),KC_RGUI,        KC_RALT,        KC_RCTRL,
                                                                     ALL_T(KC_SPACE),SH_OS,          UC_MOD,                                         KC_APPLICATION, SH_OS,          TD(DANCE_SHIFT)
   ),
   [1] = LAYOUT_moonlander(
@@ -404,40 +404,48 @@ void dance_1_reset(qk_tap_dance_state_t *state, void *user_data) {
     dance_state[1].step = 0;
 }
 
-void on_dance_16_cmd_or_ctrl(qk_tap_dance_state_t *state, void *user_data) {
-    uint8_t code = cmd_or_ctrl();
-    if (state->count == 3) {
-        tap_code(code);
-        tap_code(code);
-        tap_code(code);
-    }
+void on_dance_16_cmd_or_ctrl_alt(qk_tap_dance_state_t *state, void *user_data) {
     if (state->count > 3) {
-        tap_code(code);
+        send_string("\a");
     }
 }
 
-void dance_16_cmd_or_ctrl_finished(qk_tap_dance_state_t *state, void *user_data) {
-    uint8_t code         = cmd_or_ctrl();
-    dance_state[16].step = dance_step(state);
-    switch (dance_state[16].step) {
-        case SINGLE_TAP:
-        case SINGLE_HOLD:
-            register_code(code);
-            add_oneshot_mods(MOD_BIT(code));
+void dance_16_cmd_or_ctrl_alt_finished(qk_tap_dance_state_t *state, void *user_data) {
+    switch (state->count) {
+        case 1:
+            register_code(cmd_or_ctrl());
+            add_oneshot_mods(MOD_BIT(cmd_or_ctrl()));
             break;
-        case DOUBLE_TAP:
-        case DOUBLE_SINGLE_TAP:
-        case DOUBLE_HOLD:
-            tap_code(code);
-            register_code(code);
+        case 2:
+            register_code(KC_LALT);
+            add_oneshot_mods(MOD_BIT(KC_LALT));
+            break;
+        case 3:
+            register_code(cmd_or_ctrl());
+            register_code(KC_LALT);
+            add_oneshot_mods(MOD_BIT(cmd_or_ctrl()) | MOD_BIT(KC_LALT));
+            break;
+        default:
             break;
     }
 }
 
-void dance_16_cmd_or_ctrl_reset(qk_tap_dance_state_t *state, void *user_data) {
+void dance_16_cmd_or_ctrl_alt_reset(qk_tap_dance_state_t *state, void *user_data) {
     wait_ms(10);
-    unregister_code(cmd_or_ctrl());
-    dance_state[16].step = 0;
+    switch (state->count) {
+        case 1:
+            unregister_code(cmd_or_ctrl());
+            break;
+        case 2:
+            unregister_code(KC_LALT);
+            break;
+        case 3:
+            unregister_code(cmd_or_ctrl());
+            unregister_code(KC_LALT);
+            break;
+        default:
+            break;
+    }
 }
 
 void on_dance_17_ctrl_or_win_alt(qk_tap_dance_state_t *state, void *user_data) {
@@ -1031,7 +1039,7 @@ qk_tap_dance_action_t tap_dance_actions[] = {
     [DANCE_12]    = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_12, dance_12_finished, dance_12_reset),
     [DANCE_13]    = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_13, dance_13_finished, dance_13_reset),
     [DANCE_14]    = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_14, dance_14_finished, dance_14_reset),
-    [CMD_OR_CTRL] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_16_cmd_or_ctrl, dance_16_cmd_or_ctrl_finished, dance_16_cmd_or_ctrl_reset),
+    [CMDCTRL_ALT] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_16_cmd_or_ctrl_alt, dance_16_cmd_or_ctrl_alt_finished, dance_16_cmd_or_ctrl_alt_reset),
     [CTRLWIN_ALT] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_17_ctrl_or_win_alt, dance_17_ctrl_or_win_alt_finished, dance_17_ctrl_or_win_alt_reset),
     [DANCE_SHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_18_shift_caps_word, dance_18_shift_caps_word_finished, dance_18_shift_caps_word_reset),
 };
