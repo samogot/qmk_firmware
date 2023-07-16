@@ -174,7 +174,6 @@ void           mousekey_off(uint8_t code);
 void           mousekey_clear(void);
 void           mousekey_send(void);
 report_mouse_t mousekey_get_report(void);
-bool           is_mousekey_pressed(void);
 
 #ifdef __cplusplus
 }

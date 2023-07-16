@@ -501,7 +501,3 @@ static void mousekey_debug(void) {
 report_mouse_t mousekey_get_report(void) {
     return mouse_report;
 }
-
-bool is_mousekey_pressed(void) {
-    return mouse_timer > 0;
-}
